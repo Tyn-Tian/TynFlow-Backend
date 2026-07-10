@@ -6,6 +6,7 @@ import { cors } from 'hono/cors';
 import budgetRoute from './routes/budget.route';
 import wishlistRoute from './routes/wishlist.route';
 import portfolioRoute from './routes/portfolio.route';
+import liveRoute from './routes/live.route';
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
@@ -20,5 +21,6 @@ app.route("/wallets", walletRoute)
 app.route("/budgets", budgetRoute)
 app.route("/wishlists", wishlistRoute)
 app.route("/portfolios", portfolioRoute)
+app.route("/lives", liveRoute)
 
 export default app
