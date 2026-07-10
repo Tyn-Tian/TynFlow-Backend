@@ -3,6 +3,7 @@ import { Bindings, Variables } from './config/env';
 import { injectSupabase } from './middlewares/auth.middleware';
 import walletRoute from './routes/wallet.route';
 import { cors } from 'hono/cors';
+import budgetRoute from './routes/budget.route';
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
@@ -14,5 +15,6 @@ app.get('/', (c) => {
 })
 
 app.route("/wallets", walletRoute)
+app.route("/budgets", budgetRoute)
 
 export default app
