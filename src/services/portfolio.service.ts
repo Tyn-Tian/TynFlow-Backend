@@ -22,4 +22,19 @@ export class PortfolioService {
     async getSnapshot(userId: string): Promise<PortfolioSnapshot[]> {
         return await this.portfolioRepo.getSnapshot(userId);
     }
+    async updateValue(id: string, delta: number, userId: string): Promise<void> {
+        const portfolio = await this.portfolioRepo.getById(id, userId);
+        if (!portfolio) throw new Error("Portfolio not found");
+
+        const newInvested = Number(portfolio.invested) + Number(delta);
+        const newValue = Number(portfolio.current_value) + Number(delta);
+
+        await this.portfolioRepo.update(id, {
+            name: portfolio.name,
+            type: portfolio.type,
+            target: portfolio.target,
+            invested: newInvested,
+            current_value: newValue,
+        }, userId);
+    }
 }

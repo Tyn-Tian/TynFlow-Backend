@@ -21,17 +21,19 @@ export class WalletService {
     }
 
     async updateBalance(id: string, delta: number, userId: string): Promise<void> {
-        const data = await this.walletRepo.getById(id, userId);
-        const newBalance = Number(data?.balance || 0) + Number(delta);
+        const wallet = await this.walletRepo.getById(id, userId);
+        if (!wallet) throw new Error("Wallet not found");
 
-        this.walletRepo.update(
+        const newBalance = Number(wallet.balance) + Number(delta);
+
+        await this.walletRepo.update(
             id,
             {
-                name: data?.name ?? "",
-                type: data?.type ?? "",
+                name: wallet.name,
+                type: wallet.type,
                 balance: newBalance
             },
             userId
-        )
+        );
     }
 }

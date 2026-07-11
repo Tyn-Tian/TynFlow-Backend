@@ -23,4 +23,18 @@ export class BudgetService {
     async delete(id: string, userId: string): Promise<void> {
         return this.budgetRepo.delete(id, userId);
     }
+
+    async updateLeftover(id: string, delta: number, userId: string): Promise<void> {
+        const budget = await this.budgetRepo.getById(id, userId);
+        if (!budget) throw new Error("Budget not found");
+
+        const currentLeftover = Number(budget.leftover);
+        const newLeftover = currentLeftover + delta;
+
+        await this.budgetRepo.update(id, {
+            name: budget.name,
+            total: budget.total,
+            leftover: newLeftover
+        }, userId);
+    }
 }

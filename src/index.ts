@@ -8,6 +8,7 @@ import wishlistRoute from './routes/wishlist.route';
 import portfolioRoute from './routes/portfolio.route';
 import liveRoute from './routes/live.route';
 import schedulerRoute from './routes/scheduler.route';
+import transactionRoute from './routes/transaction.route';
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
@@ -24,5 +25,6 @@ app.route("/wishlists", wishlistRoute)
 app.route("/portfolios", portfolioRoute)
 app.route("/lives", liveRoute)
 app.route("/schedulers", schedulerRoute)
+app.route("/transactions", transactionRoute)
 
 export default app

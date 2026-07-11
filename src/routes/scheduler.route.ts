@@ -4,7 +4,6 @@ import { Bindings } from "../config/env";
 import { requireAuth } from '../middlewares/auth.middleware';
 import { SchedulerRepository } from '../repositories/scheduler.repository';
 import { SchedulerService } from '../services/scheduler.service';
-import { SchedulerDto } from '../domain/scheduler/scheduler.type';
 
 const schedulerRoute = new Hono<{ Bindings: Bindings, Variables: Variables }>();
 
