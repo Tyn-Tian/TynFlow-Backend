@@ -1,18 +1,24 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { IWishlistRepository } from "../domain/wishlist/wishlist.repository.interface";
-import { Wishlist, WishlistDto } from "../domain/wishlist/wishlist.type";
+import { Params, Wishlist, WishlistDto } from "../domain/wishlist/wishlist.type";
 
 export class WishlistRepository implements IWishlistRepository {
     constructor(private supabase: SupabaseClient) { }
 
-    async getAll(page: number, limit: number, userId: string): Promise<{ wishlists: Wishlist[], count: number }> {
-        const from = (page - 1) * limit;
-        const to = from + limit - 1;
+    async getAll(params: Params, userId: string): Promise<{ wishlists: Wishlist[], count: number }> {
+        const from = (params.page - 1) * params.limit;
+        const to = from + params.limit - 1;
 
-        const { data, count, error } = await this.supabase
+        let query = this.supabase
             .from("wishlists")
             .select("id, user_id, created_at, name, priority, status, price", { count: "exact" })
-            .eq("user_id", userId)
+            .eq("user_id", userId);
+
+        if (params.search) query = query.ilike("name", `%${params.search}%`);
+        if (params.priority) query = query.eq("priority", params.priority);
+        if (params.status) query = query.eq("status", params.status);
+
+        const { data, count, error } = await query
             .order("priority", { ascending: true })
             .order("price", { ascending: true })
             .range(from, to);

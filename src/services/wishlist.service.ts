@@ -1,11 +1,11 @@
 import { IWishlistRepository } from "../domain/wishlist/wishlist.repository.interface";
-import { WishlistDto } from "../domain/wishlist/wishlist.type";
+import { Params, WishlistDto } from "../domain/wishlist/wishlist.type";
 
 export class WishlistService {
     constructor(private wishlistRepo: IWishlistRepository) {}
 
-    async getAll(page: number = 1, limit: number = 10, userId: string) {
-        return this.wishlistRepo.getAll(page, limit, userId);
+    async getAll(params: Params, userId: string) {
+        return this.wishlistRepo.getAll(params, userId);
     }
 
     async create(dto: WishlistDto, userId: string): Promise<void> {

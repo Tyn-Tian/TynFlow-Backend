@@ -20,9 +20,12 @@ wishlistRoute.get("/", requireAuth, async (c) => {
 
     const page = parseInt(c.req.query("page") ?? "1");
     const limit = parseInt(c.req.query("limit") ?? "10");
+    const search = c.req.query("search");
+    const priority = c.req.query("priority") as any;
+    const status = c.req.query("status") as any;
 
     const service = getWishlistService(c);
-    const items = await service.getAll(page, limit, userId);
+    const items = await service.getAll({ page, limit, search, priority, status }, userId);
 
     return c.json({
         success: true,
