@@ -10,6 +10,7 @@ import liveRoute from './routes/live.route';
 import schedulerRoute from './routes/scheduler.route';
 import transactionRoute from './routes/transaction.route';
 import jobRoute from './routes/job.route';
+import authRoute from './routes/auth.route';
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
@@ -28,5 +29,6 @@ app.route("/lives", liveRoute)
 app.route("/schedulers", schedulerRoute)
 app.route("/transactions", transactionRoute)
 app.route("/jobs", jobRoute)
+app.route("/auth", authRoute)
 
 export default app

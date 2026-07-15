@@ -27,6 +27,7 @@ export async function requireAuth(c: Context, next: Next) {
     }
 
     c.set("userId", data.user.id);
+    c.set("email", data.user.email);
 
     await next();
 }

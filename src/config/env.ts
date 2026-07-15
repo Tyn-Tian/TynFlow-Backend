@@ -7,4 +7,5 @@ export type Bindings = {
 export type Variables = {
     supabase: ReturnType<typeof import("@supabase/supabase-js").createClient>;
     userId?: string;
+    email?: string;
 };
