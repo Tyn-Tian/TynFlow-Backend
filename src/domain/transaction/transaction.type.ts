@@ -9,6 +9,13 @@ export interface Filters {
     dates?: string[];
 }
 
+export interface Params {
+    page: number;
+    limit: number;
+    walletId?: string;
+    budgetId?: string;
+}
+
 export interface Transaction {
     id: string;
     name: string;

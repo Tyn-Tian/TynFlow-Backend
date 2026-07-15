@@ -1,10 +1,54 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { ITransactionRepository } from "../domain/transaction/scheduler.repository.interface";
-import { Filters, Transaction, TransactionDto } from "../domain/transaction/transaction.type";
+import { ITransactionRepository } from "../domain/transaction/transaction.repository.interface";
+import { Filters, Params, Transaction, TransactionDto } from "../domain/transaction/transaction.type";
 
 export class TransactionRepository implements ITransactionRepository {
     constructor(private supabase: SupabaseClient) { }
 
+    async getAll(params: Params, userId: string): Promise<{ transactions: Transaction[], count: number }> {
+        let dateQuery = this.supabase
+            .from("transactions")
+            .select("date")
+            .eq("user_id", userId)
+            .order("date", { ascending: false });
+
+        if (params.walletId) dateQuery = dateQuery.eq("wallet_id", params.walletId);
+        if (params.budgetId) dateQuery = dateQuery.eq("budget_id", params.budgetId);
+
+        const { data: dateData, error: dateError } = await dateQuery;
+        if (dateError) throw new Error(dateError.message);
+
+        const uniqueDates = Array.from(new Set((dateData ?? []).map(d => d.date)));
+        const totalDates = uniqueDates.length;
+
+        const from = (params.page - 1) * params.limit;
+        const pageDates = uniqueDates.slice(from, from + params.limit);
+
+        if (pageDates.length === 0) {
+            return { transactions: [], count: totalDates };
+        }
+
+        let query = this.supabase
+            .from("transactions")
+            .select(
+                "id, name, date, amount, type, budget_id, wallet_id, transfer_id, admin_fee, portfolio_id, budget:budgets(name), wallet:wallets!wallet_id(name), transfer:wallets!transfer_id(name), portfolio:portfolios(name)"
+            )
+            .eq("user_id", userId)
+            .in("date", pageDates);
+
+        if (params.walletId) query = query.eq("wallet_id", params.walletId)
+        if (params.budgetId) query = query.eq("budget_id", params.budgetId)
+
+        const { data, error } = await query
+            .order("date", { ascending: false })
+
+        if (error) throw new Error(error.message)
+        
+        return {
+            transactions: data ?? [],
+            count: totalDates 
+        }
+    }
     async findTransactions(filters: Filters, userId: string): Promise<Transaction[]> {
         let query = this.supabase
             .from("transactions")
@@ -38,38 +82,6 @@ export class TransactionRepository implements ITransactionRepository {
 
         if (error) throw new Error(error.message)
         return data ?? []
-    }
-    async findTransactionDates(filters: { walletId?: string; budgetId?: string; }, userId: string): Promise<{ date: string }[]> {
-        let query = this.supabase
-            .from("transactions")
-            .select("date")
-            .eq("user_id", userId);
-
-        if (filters.walletId) {
-            query = query.or(
-                `wallet_id.eq.${filters.walletId},transfer_id.eq.${filters.walletId}`,
-            );
-        }
-        if (filters.budgetId) {
-            query = query.eq("budget_id", filters.budgetId);
-        }
-
-        const { data, error } = await query.order("date", { ascending: false })
-
-        if (error) throw new Error(error.message)
-        return data ?? []
-    }
-    async findEarliestTransaction(userId: string): Promise<{ date: string }> {
-        const { data, error } = await this.supabase
-            .from("transactions")
-            .select("date")
-            .eq("user_id", userId)
-            .order("date", { ascending: true })
-            .limit(1)
-            .single();
-
-        if (error) throw new Error(error.message)
-        return data ?? null
     }
     async getById(id: string, userId: string): Promise<Transaction> {
         const { data, error } = await this.supabase

@@ -27,6 +27,35 @@ function getTransactionService(c: any) {
     return new TransactionService(transactionRepo, budgetService, walletService, portfolioService);
 }
 
+transactionRoute.get("/", requireAuth, async (c) => {
+    const userId = c.get("userId");
+    if (!userId) return c.json({
+        success: false,
+        message: "Unauthenticated"
+    }, 401)
+
+    const page = parseInt(c.req.query("page") ?? "1");
+    const limit = parseInt(c.req.query("limit") ?? "10");
+    const walletId = c.req.query("walletId") as string;
+    const budgetId = c.req.query("budgetId") as string;
+
+    const service = getTransactionService(c)
+    const { transactions, count } = await service.getAll({
+        page,
+        limit,
+        walletId,
+        budgetId
+    }, userId);
+
+    return c.json({
+        success: true,
+        data: {
+            transactions,
+            count
+        }
+    })
+})
+
 transactionRoute.post("/", requireAuth, async (c) => {
     const userId = c.get("userId");
     if (!userId) return c.json({
