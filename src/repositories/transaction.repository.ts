@@ -14,6 +14,12 @@ export class TransactionRepository implements ITransactionRepository {
 
         if (params.walletId) dateQuery = dateQuery.eq("wallet_id", params.walletId);
         if (params.budgetId) dateQuery = dateQuery.eq("budget_id", params.budgetId);
+        if (params.month && params.year) {
+            const startDate = `${params.year}-${params.month.padStart(2, '0')}-01`;
+            const endDay = new Date(Number(params.year), Number(params.month), 0).getDate();
+            const endDate = `${params.year}-${params.month.padStart(2, '0')}-${endDay}`;
+            dateQuery = dateQuery.gte("date", startDate).lte("date", endDate);
+        }
 
         const { data: dateData, error: dateError } = await dateQuery;
         if (dateError) throw new Error(dateError.message);
@@ -36,8 +42,8 @@ export class TransactionRepository implements ITransactionRepository {
             .eq("user_id", userId)
             .in("date", pageDates);
 
-        if (params.walletId) query = query.eq("wallet_id", params.walletId)
-        if (params.budgetId) query = query.eq("budget_id", params.budgetId)
+        if (params.walletId) query = query.eq("wallet_id", params.walletId);
+        if (params.budgetId) query = query.eq("budget_id", params.budgetId);
 
         const { data, error } = await query
             .order("date", { ascending: false })

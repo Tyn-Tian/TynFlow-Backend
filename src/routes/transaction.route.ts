@@ -38,13 +38,17 @@ transactionRoute.get("/", requireAuth, async (c) => {
     const limit = parseInt(c.req.query("limit") ?? "10");
     const walletId = c.req.query("walletId") as string;
     const budgetId = c.req.query("budgetId") as string;
+    const month = c.req.query("month") as string;
+    const year = c.req.query("year") as string;
 
     const service = getTransactionService(c)
     const { transactions, count } = await service.getAll({
         page,
         limit,
         walletId,
-        budgetId
+        budgetId,
+        month,
+        year
     }, userId);
 
     return c.json({
@@ -90,6 +94,26 @@ transactionRoute.post("/bulk", requireAuth, async (c) => {
         success: true,
         message: "Transactions created successfully"
     }, 201);
+})
+
+transactionRoute.get("/export", requireAuth, async (c) => {
+    const userId = c.get("userId");
+    if (!userId) return c.json({
+        success: false,
+        message: "Unauthenticated"
+    }, 401);
+
+    const month = c.req.query("month") as string;
+    const year = c.req.query("year") as string;
+
+    const service = getTransactionService(c);
+    const data = await service.exportExcel(month, year, userId);
+
+    return c.json({
+        success: true,
+        data,
+        message: "Transactions exported successfully"
+    }, 200);
 })
 
 transactionRoute.get("/:id", requireAuth, async (c) => {

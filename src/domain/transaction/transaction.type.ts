@@ -14,6 +14,8 @@ export interface Params {
     limit: number;
     walletId?: string;
     budgetId?: string;
+    month?: string;
+    year?: string;
 }
 
 export interface Transaction {
@@ -41,9 +43,4 @@ export interface TransactionDto {
     portfolio_id?: string | null;
 }
 
-export interface Params {
-    page: number;
-    walletId?: string;
-    budgetId?: string;
-    portfolioId?: string;
-}
+

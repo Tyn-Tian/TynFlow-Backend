@@ -152,64 +152,14 @@ export class TransactionService {
 
         await this.transactionRepo.delete(id, userId);
     }
-    async exportExcel({
-        wallets,
-        budgets,
-        portfolios,
-        filters,
-        userId
-    }: {
-        wallets: Wallet[],
-        budgets: Budget[],
-        portfolios: Portfolio[],
-        filters: Filters,
-        userId: string
-    }) {
-        const data = await this.transactionRepo.findTransactions(filters, userId);
+    async exportExcel(month: string, year: string, userId: string) {
+        const { transactions } = await this.transactionRepo.getAll({
+            month,
+            year,
+            page: 1,
+            limit: 1000000
+        }, userId);
 
-        const walletIds = Array.from(
-            new Set(
-                data.flatMap(
-                    (r) => [r.wallet_id, r.transfer_id].filter(Boolean) as string[],
-                ),
-            ),
-        );
-        let walletMap: Record<string, string> = {};
-        if (walletIds.length) {
-            if (wallets)
-                walletMap = Object.fromEntries(
-                    wallets.map((w) => [w.id, w.name ?? ""]),
-                );
-        }
-
-        const budgetIds = Array.from(
-            new Set(data.map((r) => r.budget_id).filter(Boolean) as string[]),
-        );
-        let budgetMap: Record<string, string> = {};
-        if (budgetIds.length) {
-            if (budgets)
-                budgetMap = Object.fromEntries(
-                    budgets.map((b) => [b.id, b.name ?? ""]),
-                );
-        }
-
-        const portfolioIds = Array.from(
-            new Set(data.map((r) => r.portfolio_id).filter(Boolean) as string[]),
-        );
-        let portfolioMap: Record<string, string> = {};
-        if (portfolioIds.length) {
-            if (portfolios)
-                portfolioMap = Object.fromEntries(
-                    portfolios.map((p) => [p.id, p.name ?? ""]),
-                );
-        }
-
-        return data.map((t) => ({
-            ...t,
-            budgetName: t.budget_id ? budgetMap[t.budget_id] : undefined,
-            walletName: t.wallet_id ? walletMap[t.wallet_id] : undefined,
-            transferName: t.transfer_id ? walletMap[t.transfer_id] : undefined,
-            portfolioName: t.portfolio_id ? portfolioMap[t.portfolio_id] : undefined,
-        }));
+        return transactions;
     }
 }
