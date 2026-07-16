@@ -72,17 +72,6 @@ export class TransactionRepository implements ITransactionRepository {
         if (filters.endDate) {
             query = query.lte("date", filters.endDate);
         }
-        if (filters.walletId) {
-            query = query.or(
-                `wallet_id.eq.${filters.walletId},transfer_id.eq.${filters.walletId}`,
-            );
-        }
-        if (filters.budgetId) {
-            query = query.eq("budget_id", filters.budgetId);
-        }
-        if (filters.dates && filters.dates.length > 0) {
-            query = query.in("date", filters.dates);
-        }
 
         const { data, error } = await query.order("date", { ascending: false })
 

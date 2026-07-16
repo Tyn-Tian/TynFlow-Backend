@@ -3,9 +3,6 @@ import { ITransactionRepository } from "../domain/transaction/transaction.reposi
 import { Filters, Params, Transaction, TransactionDto } from "../domain/transaction/transaction.type";
 import { BudgetService } from "./budget.service";
 import { PortfolioService } from './portfolio.service';
-import { Wallet } from '../domain/wallet/wallet.type';
-import { Budget } from '../domain/budget/budget.type';
-import { Portfolio } from '../domain/portfolio/portfolio.type';
 
 export class TransactionService {
     constructor(

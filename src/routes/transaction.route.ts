@@ -9,6 +9,7 @@ import { BudgetService } from "../services/budget.service";
 import { PortfolioRepository } from "../repositories/portfolio.repository";
 import { PortfolioService } from "../services/portfolio.service";
 import { requireAuth } from "../middlewares/auth.middleware";
+import { Filters, Params, TransactionType } from "../domain/transaction/transaction.type";
 
 const transactionRoute = new Hono<{ Bindings: Bindings, Variables: Variables }>();
 
@@ -41,15 +42,17 @@ transactionRoute.get("/", requireAuth, async (c) => {
     const month = c.req.query("month") as string;
     const year = c.req.query("year") as string;
 
-    const service = getTransactionService(c)
-    const { transactions, count } = await service.getAll({
+    const params: Params = {
         page,
         limit,
         walletId,
         budgetId,
         month,
         year
-    }, userId);
+    }
+
+    const service = getTransactionService(c)
+    const { transactions, count } = await service.getAll(params, userId);
 
     return c.json({
         success: true,
@@ -76,6 +79,32 @@ transactionRoute.post("/", requireAuth, async (c) => {
         success: true,
         message: "Transaction created successfully"
     }, 201);
+})
+
+transactionRoute.get("/search", requireAuth, async (c) => {
+    const userId = c.get("userId");
+    if (!userId) return c.json({
+        success: false,
+        message: "Unauthenticated"
+    }, 401)
+
+    const type = c.req.query("type") as TransactionType;
+    const startDate = c.req.query("startDate") as string;
+    const endDate = c.req.query("endDate") as string;
+
+    const filters: Filters = {
+        type,
+        startDate,
+        endDate
+    }
+
+    const service = getTransactionService(c)
+    const transactions = await service.findTransactions(filters, userId);
+
+    return c.json({
+        success: true,
+        data: transactions,
+    })
 })
 
 transactionRoute.post("/bulk", requireAuth, async (c) => {
