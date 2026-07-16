@@ -11,7 +11,7 @@ export class JobRepository implements IJobRepository {
 
         const { data, count, error } = await this.supabase
             .from('jobs')
-            .select("id, position, company, source, status, applied_at, updated_at", { count: "exact" })
+            .select("id, position, company, source, status, applied_at, updated_at, deadline_at", { count: "exact" })
             .eq('user_id', userId)
             .range(from, to)
             .order('updated_at', { ascending: false });
@@ -25,7 +25,7 @@ export class JobRepository implements IJobRepository {
     async getById(id: string, userId: string): Promise<Job> {
         const { data, error } = await this.supabase
             .from('jobs')
-            .select("id, position, company, source, status, applied_at, updated_at")
+            .select("id, position, company, source, status, applied_at, updated_at, deadline_at")
             .eq('id', id)
             .eq('user_id', userId)
             .single();
