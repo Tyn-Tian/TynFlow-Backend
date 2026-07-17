@@ -4,6 +4,7 @@ export interface Filters {
     type?: TransactionType;
     startDate?: string;
     endDate?: string;
+    budgetId?: string;
 }
 
 export interface Params {

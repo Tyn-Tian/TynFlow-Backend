@@ -10,6 +10,7 @@ import { PortfolioRepository } from "../repositories/portfolio.repository";
 import { PortfolioService } from "../services/portfolio.service";
 import { requireAuth } from "../middlewares/auth.middleware";
 import { Filters, Params, TransactionType } from "../domain/transaction/transaction.type";
+import { AuthRepository } from "../repositories/auth.repository";
 
 const transactionRoute = new Hono<{ Bindings: Bindings, Variables: Variables }>();
 
@@ -20,7 +21,8 @@ function getTransactionService(c: any) {
     const walletService = new WalletService(walletRepo);
 
     const budgetRepo = new BudgetRepository(c.get("supabase"));
-    const budgetService = new BudgetService(budgetRepo);
+    const authRepo = new AuthRepository(c.get("supabase"));
+    const budgetService = new BudgetService(budgetRepo, authRepo, transactionRepo);
 
     const portfolioRepo = new PortfolioRepository(c.get("supabase"));
     const portfolioService = new PortfolioService(portfolioRepo);
