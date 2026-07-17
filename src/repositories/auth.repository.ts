@@ -8,7 +8,7 @@ export class AuthRepository implements IAuthRepository {
     async getProfile(email: string, userId: string): Promise<Profile> {
         const { data, error } = await this.supabase
             .from("profiles")
-            .select("name, start_date, end_date")
+            .select("name, start_date, end_date, menu")
             .eq("user_id", userId)
             .single()
 
