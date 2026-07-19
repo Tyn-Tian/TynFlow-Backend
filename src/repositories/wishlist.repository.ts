@@ -5,28 +5,36 @@ import { Params, Wishlist, WishlistDto } from "../domain/wishlist/wishlist.type"
 export class WishlistRepository implements IWishlistRepository {
     constructor(private supabase: SupabaseClient) { }
 
-    async getAll(params: Params, userId: string): Promise<{ wishlists: Wishlist[], count: number }> {
-        const from = (params.page - 1) * params.limit;
-        const to = from + params.limit - 1;
-
+    async getAll(): Promise<{ wishlists: Wishlist[], count: number }> {
         let query = this.supabase
             .from("wishlists")
-            .select("id, user_id, created_at, name, priority, status, price", { count: "exact" })
-            .eq("user_id", userId);
-
-        if (params.search) query = query.ilike("name", `%${params.search}%`);
-        if (params.priority) query = query.eq("priority", params.priority);
-        if (params.status) query = query.eq("status", params.status);
+            .select("id, user_id, created_at, name, priority, status, price", { count: "exact" });
 
         const { data, count, error } = await query
             .order("priority", { ascending: true })
-            .order("price", { ascending: true })
-            .range(from, to);
+            .order("price", { ascending: true });
 
         if (error) throw new Error(error.message)
 
+        const wishlistsData = data ?? [];
+
+        const userIds = [...new Set(wishlistsData.map(w => w.user_id))];
+        if (userIds.length > 0) {
+            const { data: profilesData, error: profilesError } = await this.supabase
+                .from("profiles")
+                .select("user_id, name")
+                .in("user_id", userIds);
+
+            if (!profilesError && profilesData) {
+                const profileMap = new Map(profilesData.map(p => [p.user_id, p]));
+                wishlistsData.forEach(w => {
+                    (w as any).profiles = profileMap.get(w.user_id) || null;
+                });
+            }
+        }
+
         return {
-            wishlists: data ?? [],
+            wishlists: wishlistsData as unknown as Wishlist[],
             count: count ?? 0
         }
     }
@@ -44,6 +52,15 @@ export class WishlistRepository implements IWishlistRepository {
         const { error } = await this.supabase
             .from("wishlists")
             .update(dto)
+            .eq("id", id)
+            .eq("user_id", userId);
+
+        if (error) throw new Error(error.message)
+    }
+    async change(id: string, status: string, userId: string): Promise<void> {
+        const { error } = await this.supabase
+            .from("wishlists")
+            .update({ status })
             .eq("id", id)
             .eq("user_id", userId);
 
