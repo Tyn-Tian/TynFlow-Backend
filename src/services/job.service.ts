@@ -1,11 +1,11 @@
 import { IJobRepository } from "../domain/job/job.repository.interface";
-import { Job, JobDto } from "../domain/job/job.type";
+import { Job, JobDto, Params } from "../domain/job/job.type";
 
 export class JobService {
     constructor(private jobRepo: IJobRepository) {}
 
-    async getAll(page: number, limit: number, userId: string): Promise<{ jobs: Job[], count: number }> {
-        return this.jobRepo.getAll(page, limit, userId)
+    async getAll(params: Params, userId: string): Promise<{ jobs: Job[], count: number }> {
+        return this.jobRepo.getAll(params, userId)
     }
     async getById(id: string, userId: string): Promise<Job> {
         return this.jobRepo.getById(id, userId)

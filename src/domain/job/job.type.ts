@@ -9,6 +9,12 @@ export interface Job {
     deadline_at: string
 }
 
+export interface Params {
+    page: number
+    limit: number
+    search?: string
+}
+
 export interface JobDto {
     position: string
     company: string

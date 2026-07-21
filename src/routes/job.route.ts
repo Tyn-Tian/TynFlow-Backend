@@ -3,6 +3,7 @@ import { Bindings, Variables } from "../config/env";
 import { JobService } from "../services/job.service";
 import { requireAuth } from "../middlewares/auth.middleware";
 import { JobRepository } from "../repositories/job.repository";
+import { Params } from "../domain/job/job.type";
 
 const jobRoute = new Hono<{ Bindings: Bindings, Variables: Variables }>();
 
@@ -20,9 +21,16 @@ jobRoute.get("/", requireAuth, async (c) => {
 
     const page = parseInt(c.req.query("page") ?? "1");
     const limit = parseInt(c.req.query("limit") ?? "10");
+    const search = c.req.query("search");
+
+    const params: Params = {
+        page,
+        limit,
+        search
+    }
 
     const service = getJobService(c);
-    const items = await service.getAll(page, limit, userId);
+    const items = await service.getAll(params, userId);
 
     return c.json({
         success: true,
